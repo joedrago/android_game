@@ -14,7 +14,9 @@ public class TestGame extends Game
     public boolean initGfx()
     {
         s_ = new Sprite(this)
-                .load(R.raw.test)
+                //.load(R.raw.test)
+                .size(100, 300)
+                .color(1.0f, 0.5f, 0.0f)
                 .pos(width() / 2, height() / 2)
                 .rot(35);
         return true;

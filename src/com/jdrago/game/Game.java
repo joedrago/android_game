@@ -359,10 +359,9 @@ public class Game implements GLSurfaceView.Renderer
 
             x_ = 0;
             y_ = 0;
-            w_ = 1;
-            h_ = 1;
             r_ = 0;
             t_ = game_.defaultTexture_;
+            size(0, 0);
 
             cr_ = 1.0f;
             cg_ = 1.0f;
@@ -447,8 +446,8 @@ public class Game implements GLSurfaceView.Renderer
 
         Matrix.setIdentityM(modelMatrix_, 0);
         Matrix.translateM(modelMatrix_, 0, sprite.x_ - (sprite.w_ / 2), sprite.y_ - (sprite.h_ / 2), 0);
-        Matrix.scaleM(modelMatrix_, 0, sprite.w_, sprite.h_, 0);
         Matrix.rotateM(modelMatrix_, 0, sprite.r_, 0, 0, 1);
+        Matrix.scaleM(modelMatrix_, 0, sprite.w_, sprite.h_, 0);
         Matrix.multiplyMM(tempMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, tempMatrix_, 0);
         GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
