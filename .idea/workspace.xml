@@ -6,11 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="dd76f7b0-348f-491b-b808-ead8dc4f2073" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/jdrago/game/Game.java" afterPath="$PROJECT_DIR$/src/com/jdrago/game/Game.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" afterPath="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="game.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031357219" ignored="false" />
+    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031702701" ignored="false" />
     <file path="/GameActivity.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372024493821" ignored="false" />
     <file path="/GameView.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372027294305" ignored="false" />
     <file path="/Game.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031125279" ignored="false" />
@@ -76,13 +77,22 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Game.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Game.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/Game.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="202" column="36" selection-start="6505" selection-end="6505" vertical-scroll-proportion="0.46907216">
+            <state line="282" column="0" selection-start="9350" selection-end="9350" vertical-scroll-proportion="0.0">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TestGame.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="27" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="0.64285713">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -113,8 +123,8 @@
         <option value="$PROJECT_DIR$/../rubik/src/com/jdrago/rubik/RubikRenderer.java" />
         <option value="$PROJECT_DIR$/src/com/jdrago/game/GameView.java" />
         <option value="$PROJECT_DIR$/src/com/jdrago/game/GameActivity.java" />
-        <option value="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" />
         <option value="$PROJECT_DIR$/src/com/jdrago/game/Game.java" />
+        <option value="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" />
       </list>
     </option>
   </component>
@@ -431,7 +441,11 @@
       <created>1372031361023</created>
       <updated>1372031361023</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="bit of cleanup">
+      <created>1372031703912</created>
+      <updated>1372031703912</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -454,7 +468,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2495935" sideWeight="0.69148934" order="0" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.30851063" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.30851063" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -503,7 +517,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixes to sprite scale+rotate, added pngs" />
+    <option name="LAST_COMMIT_MESSAGE" value="bit of cleanup" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -521,6 +535,7 @@
     <MESSAGE value="basic rendering, lots of ugly" />
     <MESSAGE value="functioning Sprites and clicking" />
     <MESSAGE value="fixes to sprite scale+rotate, added pngs" />
+    <MESSAGE value="bit of cleanup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -591,19 +606,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="18" column="40" selection-start="366" selection-end="366" vertical-scroll-proportion="0.42857143">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/Game.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="202" column="36" selection-start="6505" selection-end="6505" vertical-scroll-proportion="0.46907216">
+        <state line="282" column="0" selection-start="9350" selection-end="9350" vertical-scroll-proportion="0.0">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="27" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="0.64285713">
+          <folding />
         </state>
       </provider>
     </entry>

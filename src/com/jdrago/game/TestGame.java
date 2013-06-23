@@ -25,7 +25,6 @@ public class TestGame extends Game
     public void render()
     {
         renderBegin(0.3f, 0.3f, 0.3f);
-        prepare2D();
 
         s_.draw();
 

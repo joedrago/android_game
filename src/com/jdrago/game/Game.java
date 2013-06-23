@@ -279,6 +279,8 @@ public class Game implements GLSurfaceView.Renderer
         GLES20.glDepthFunc(GLES20.GL_LEQUAL);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+        prepare2D();
     }
 
     public void prepare2D()
@@ -319,9 +321,6 @@ public class Game implements GLSurfaceView.Renderer
     public void render()
     {
         renderBegin(1.0f, 0.0f, 0.0f);
-
-        prepare2D();
-        // draw 2D stuff here
 
         renderEnd();
     }
