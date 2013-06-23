@@ -48,21 +48,13 @@ public class Game implements GLSurfaceView.Renderer
     private float[] tempRotMatrix_ = new float[16];
     private float[] tempMatrix_ = new float[16];
 
-    private final float[] cubieVertData_ = {
-            // X, Y, Z, U, V
-            -1.5f, -1.5f, -1.5f, 0, 0,
-            -0.5f, -1.5f, -1.5f, 1, 0,
-            -0.5f, -0.5f, -1.5f, 1, 1,
-            -1.5f, -0.5f, -1.5f, 0, 1};
-    private FloatBuffer cubieVerts_;
-
-    private final float[] buttonVertData_ = {
+    private final float[] quadVertData_ = {
             // X, Y, Z, U, V
             0, 0, 0, 0, 0,
             1, 0, 0, 1, 0,
             1, 1, 0, 1, 1,
             0, 1, 0, 0, 1};
-    private FloatBuffer buttonVerts_;
+    private FloatBuffer quadVerts_;
 
     private final int[] quadIndicesData_ = {0, 1, 2, 2, 3, 0};
     private IntBuffer quadIndices_;
@@ -208,10 +200,8 @@ public class Game implements GLSurfaceView.Renderer
     public Game(Context context)
     {
         context_ = context;
-        cubieVerts_ = ByteBuffer.allocateDirect(cubieVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        cubieVerts_.put(cubieVertData_).position(0);
-        buttonVerts_ = ByteBuffer.allocateDirect(buttonVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        buttonVerts_.put(buttonVertData_).position(0);
+        quadVerts_ = ByteBuffer.allocateDirect(quadVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        quadVerts_.put(quadVertData_).position(0);
         quadIndices_ = ByteBuffer.allocateDirect(quadIndicesData_.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
         quadIndices_.put(quadIndicesData_).position(0);
     }
@@ -310,13 +300,13 @@ public class Game implements GLSurfaceView.Renderer
                 0f, 0f, 0f,       // center
                 0f, 1.0f, 0.0f);  // up
 
-        buttonVerts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
+        quadVerts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, quadVerts_);
         checkGlError("glVertexAttribPointer maPosition");
-        buttonVerts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        quadVerts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
         GLES20.glEnableVertexAttribArray(posHandle_);
         checkGlError("glEnableVertexAttribArray posHandle");
-        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
+        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, quadVerts_);
         checkGlError("glVertexAttribPointer texHandle");
         GLES20.glEnableVertexAttribArray(texHandle_);
         checkGlError("glEnableVertexAttribArray texHandle");
