@@ -32,6 +32,15 @@ public class Game implements GLSurfaceView.Renderer
     private int texHandle_;
     private int vertColorHandle_;
 
+    public TextureInfo defaultTexture_;
+
+    private static final int FLOAT_SIZE_BYTES = 4;
+    private static final int INT_SIZE_BYTES = 4;
+    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
+    private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
+    private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
+
+
     private float[] viewProjMatrix_ = new float[16];
     private float[] projMatrix_ = new float[16];
     private float[] modelMatrix_ = new float[16];
@@ -78,6 +87,8 @@ public class Game implements GLSurfaceView.Renderer
                     "vec4 t = texture2D(sTexture, vTextureCoord);" +
                     "gl_FragColor.rgba = u_color.rgba * t.rgba;\n" +
                     "}\n";
+
+    private boolean needsInitGfx_ = true;
 
     private int loadShader(int shaderType, String source)
     {
@@ -144,7 +155,20 @@ public class Game implements GLSurfaceView.Renderer
         }
     }
 
-    public int loadPNG(int res)
+    class TextureInfo
+    {
+        public int id;
+        public int w;
+        public int h;
+        public TextureInfo(int aid, int aw, int ah)
+        {
+            id = aid;
+            w = aw;
+            h = ah;
+        }
+    }
+
+    public TextureInfo loadImage(int res)
     {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -174,14 +198,27 @@ public class Game implements GLSurfaceView.Renderer
             }
         }
 
+        TextureInfo info = new TextureInfo(id, bitmap.getWidth(), bitmap.getHeight());
+
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
         bitmap.recycle();
-        return id;
+        return info;
     }
 
     public Game(Context context)
     {
         context_ = context;
+        cubieVerts_ = ByteBuffer.allocateDirect(cubieVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        cubieVerts_.put(cubieVertData_).position(0);
+        buttonVerts_ = ByteBuffer.allocateDirect(buttonVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        buttonVerts_.put(buttonVertData_).position(0);
+        quadIndices_ = ByteBuffer.allocateDirect(quadIndicesData_.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
+        quadIndices_.put(quadIndicesData_).position(0);
+    }
+
+    public boolean initGfx()
+    {
+        return true;
     }
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
@@ -220,7 +257,7 @@ public class Game implements GLSurfaceView.Renderer
             throw new RuntimeException("Could not get attrib location for vertColorHandle");
         }
 
-//        cubieID_ = loadPNG(R.raw.cubie);
+        needsInitGfx_ = true;
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
@@ -228,181 +265,201 @@ public class Game implements GLSurfaceView.Renderer
         width_ = width;
         height_ = height;
 
-        // Ignore the passed-in GL10 interface, and use the GLES20
-        // class's static methods instead.
-        GLES20.glViewport(0, 0, width, height);
+        GLES20.glViewport(0, 0, width_, height_);
 
-        float ratio = (float) width / height;
-        Matrix.frustumM(projMatrix_, 0, -ratio, ratio, 1, -1, 1, 20);
+        if(needsInitGfx_)
+        {
+            needsInitGfx_ = false;
 
-        //float left = 0.0f;
-        //float right = width;
-        //float bottom = height;
-        //float top = 0.0f;
-        //float near = 0.0f;
-        //float far = 20.0f;
-        //Matrix.orthoM(projMatrix_, 0, left, right, bottom, top, near, far);
+            defaultTexture_ = loadImage(R.raw.def);
+            initGfx();
+        }
+    }
+
+    public void renderBegin(float r, float g, float b)
+    {
+        GLES20.glClearColor(r, g, b, 1.0f);
+        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glUseProgram(shaderProgram_);
+        checkGlError("glUseProgram");
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+    }
+
+    public void prepare2D()
+    {
+        GLES20.glViewport(0, 0, width_, height_);
+        GLES20.glDisable(GLES20.GL_CULL_FACE);
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+        float left = 0.0f;
+        float right = width_;
+        float bottom = height_;
+        float top = 0.0f;
+        float near = 0.0f;
+        float far = 20.0f;
+        Matrix.setIdentityM(projMatrix_, 0);
+        Matrix.orthoM(projMatrix_, 0, left, right, bottom, top, near, far);
+        Matrix.setLookAtM(viewMatrix_, 0,
+                0, 0, 10,         // eye
+                0f, 0f, 0f,       // center
+                0f, 1.0f, 0.0f);  // up
+
+        buttonVerts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
+        checkGlError("glVertexAttribPointer maPosition");
+        buttonVerts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        GLES20.glEnableVertexAttribArray(posHandle_);
+        checkGlError("glEnableVertexAttribArray posHandle");
+        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
+        checkGlError("glVertexAttribPointer texHandle");
+        GLES20.glEnableVertexAttribArray(texHandle_);
+        checkGlError("glEnableVertexAttribArray texHandle");
+    }
+
+    public void renderEnd()
+    {
+    }
+
+    public void render()
+    {
+        renderBegin(1.0f, 0.0f, 0.0f);
+
+        prepare2D();
+        // draw 2D stuff here
+
+        renderEnd();
+    }
+
+    public class Sprite
+    {
+        private Game game_;
+
+        public float x_;
+        public float y_;
+        public float w_;
+        public float h_;
+        public float r_;
+
+        public float cr_;
+        public float cg_;
+        public float cb_;
+        public float ca_;
+
+        public TextureInfo t_;
+
+        public Sprite(Game game)
+        {
+            game_ = game;
+
+            x_ = 0;
+            y_ = 0;
+            w_ = 1;
+            h_ = 1;
+            r_ = 0;
+            t_ = game_.defaultTexture_;
+
+            cr_ = 1.0f;
+            cg_ = 1.0f;
+            cb_ = 1.0f;
+            ca_ = 1.0f;
+        }
+
+        public Sprite pos(float x, float y)
+        {
+            x_ = x;
+            y_ = y;
+            return this;
+        }
+
+        public Sprite size(float w, float h)
+        {
+            if(w == 0 && h == 0)
+            {
+                w_ = t_.w;
+                h_ = t_.h;
+            }
+            else if(w == 0)
+            {
+                h_ = h;
+                w_ = h_ * t_.w / t_.h;
+            }
+            else if(h == 0)
+            {
+                w_ = w;
+                h_ = w_ * t_.h / t_.w;
+            }
+            else
+            {
+                w_ = w;
+                h_ = h;
+            }
+            return this;
+        }
+
+        public Sprite load(int resourceID)
+        {
+            t_ = loadImage(resourceID);
+            size(0, 0);
+            return this;
+        }
+
+        public Sprite texture(TextureInfo t)
+        {
+            t_ = t;
+            return this;
+        }
+
+        public Sprite color(float r, float g, float b)
+        {
+            cr_ = r;
+            cg_ = g;
+            cb_ = b;
+            return this;
+        }
+
+        public Sprite alpha(float a)
+        {
+            ca_ = a;
+            return this;
+        }
+
+        public Sprite rot(float r)
+        {
+            r_ = r;
+            return this;
+        }
+
+        public void draw()
+        {
+            game_.drawSprite(this);
+        }
+    }
+
+    public void drawSprite(Sprite sprite)
+    {
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, sprite.t_.id);
+
+        Matrix.setIdentityM(modelMatrix_, 0);
+        Matrix.translateM(modelMatrix_, 0, sprite.x_ - (sprite.w_ / 2), sprite.y_ - (sprite.h_ / 2), 0);
+        Matrix.scaleM(modelMatrix_, 0, sprite.w_, sprite.h_, 0);
+        Matrix.rotateM(modelMatrix_, 0, sprite.r_, 0, 0, 1);
+        Matrix.multiplyMM(tempMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
+        Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, tempMatrix_, 0);
+        GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
+        GLES20.glUniform4f(vertColorHandle_, sprite.cr_, sprite.cg_, sprite.cb_, sprite.ca_);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, quadIndices_);
+        checkGlError("glDrawElements");
     }
 
     public void onDrawFrame(GL10 glUnused)
     {
-//        cube_.update();
-//
-//        spinX_ = lerp(spinX_, spinReqX_, SPIN_SPEED);
-//        spinY_ = lerp(spinY_, spinReqY_, SPIN_SPEED);
-//        spinZ_ = lerp(spinZ_, spinReqZ_, SPIN_SPEED);
-//
-        GLES20.glClearColor(0.1f, 0.1f, 0.9f, 1.0f);
-        GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glUseProgram(shaderProgram_);
-        checkGlError("glUseProgram");
-//
-//        GLES20.glEnable(GLES20.GL_BLEND);
-//        GLES20.glEnable(GLES20.GL_CULL_FACE);
-//        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-//        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
-//        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-//        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-//
-//        // Setup a perspective for the top square of portrait layout
-//        GLES20.glViewport(0, height_ - width_, width_, width_);
-//        Matrix.frustumM(projMatrix_, 0, -1, 1, 1, -1, 1, 20);
-//        Matrix.setLookAtM(viewMatrix_, 0,
-//                0, 0, 1,         // eye
-//                0f, 0f, 5f,       // center
-//                0f, 1.0f, 0.0f);  // up
-//
-//        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, cubieID_);
-//        cubieVerts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-//        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, cubieVerts_);
-//        checkGlError("glVertexAttribPointer maPosition");
-//        cubieVerts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-//        GLES20.glEnableVertexAttribArray(posHandle_);
-//        checkGlError("glEnableVertexAttribArray posHandle");
-//        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, cubieVerts_);
-//        checkGlError("glVertexAttribPointer texHandle");
-//        GLES20.glEnableVertexAttribArray(texHandle_);
-//        checkGlError("glEnableVertexAttribArray texHandle");
-//
-//        // Front
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 0, 0, cube_.cubies_[RubikCube.FACE_F][2]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 1, 0, cube_.cubies_[RubikCube.FACE_F][1]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 2, 0, cube_.cubies_[RubikCube.FACE_F][0]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 0, 1, cube_.cubies_[RubikCube.FACE_F][5]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 1, 1, cube_.cubies_[RubikCube.FACE_F][4]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 2, 1, cube_.cubies_[RubikCube.FACE_F][3]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 0, 2, cube_.cubies_[RubikCube.FACE_F][8]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 1, 2, cube_.cubies_[RubikCube.FACE_F][7]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_F, 2, 2, cube_.cubies_[RubikCube.FACE_F][6]);
-//
-//        // Back
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 0, 0, cube_.cubies_[RubikCube.FACE_B][6]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 1, 0, cube_.cubies_[RubikCube.FACE_B][7]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 2, 0, cube_.cubies_[RubikCube.FACE_B][8]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_Y], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 0, 1, cube_.cubies_[RubikCube.FACE_B][3]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_Y], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 1, 1, cube_.cubies_[RubikCube.FACE_B][4]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_Y], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 2, 1, cube_.cubies_[RubikCube.FACE_B][5]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 0, 2, cube_.cubies_[RubikCube.FACE_B][0]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 1, 2, cube_.cubies_[RubikCube.FACE_B][1]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_B, 2, 2, cube_.cubies_[RubikCube.FACE_B][2]);
-//
-//        // Up
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_U, 0, 0, cube_.cubies_[RubikCube.FACE_U][2]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_U, 1, 0, cube_.cubies_[RubikCube.FACE_U][1]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_U, 2, 0, cube_.cubies_[RubikCube.FACE_U][0]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_U, 0, 1, cube_.cubies_[RubikCube.FACE_U][5]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_U, 1, 1, cube_.cubies_[RubikCube.FACE_U][4]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_U, 2, 1, cube_.cubies_[RubikCube.FACE_U][3]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_U, 0, 2, cube_.cubies_[RubikCube.FACE_U][8]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_U, 1, 2, cube_.cubies_[RubikCube.FACE_U][7]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_U, 2, 2, cube_.cubies_[RubikCube.FACE_U][6]);
-//
-//        // Down
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_D, 0, 0, cube_.cubies_[RubikCube.FACE_D][2]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_D, 1, 0, cube_.cubies_[RubikCube.FACE_D][1]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_D, 2, 0, cube_.cubies_[RubikCube.FACE_D][0]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_D, 0, 1, cube_.cubies_[RubikCube.FACE_D][5]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_D, 1, 1, cube_.cubies_[RubikCube.FACE_D][4]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_D, 2, 1, cube_.cubies_[RubikCube.FACE_D][3]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_D, 0, 2, cube_.cubies_[RubikCube.FACE_D][8]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_X], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_D, 1, 2, cube_.cubies_[RubikCube.FACE_D][7]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_D, 2, 2, cube_.cubies_[RubikCube.FACE_D][6]);
-//
-//        // Left
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_L, 0, 0, cube_.cubies_[RubikCube.FACE_L][2]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_L, 1, 0, cube_.cubies_[RubikCube.FACE_L][1]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_L, 2, 0, cube_.cubies_[RubikCube.FACE_L][0]);
-//
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_L, 0, 1, cube_.cubies_[RubikCube.FACE_L][5]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_L, 1, 1, cube_.cubies_[RubikCube.FACE_L][4]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L],  cube_.rots_[RubikCube.ROT_Y], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_L, 2, 1, cube_.cubies_[RubikCube.FACE_L][3]);
-//
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_L, 0, 2, cube_.cubies_[RubikCube.FACE_L][8]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_L, 1, 2, cube_.cubies_[RubikCube.FACE_L][7]);
-//        drawCubieFace(-cube_.rots_[RubikCube.ROT_L], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_L, 2, 2, cube_.cubies_[RubikCube.FACE_L][6]);
-//
-//        // Right
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_R, 0, 0, cube_.cubies_[RubikCube.FACE_R][2]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_R, 1, 0, cube_.cubies_[RubikCube.FACE_R][1]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_U],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_R, 2, 0, cube_.cubies_[RubikCube.FACE_R][0]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_Y], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_R, 0, 1, cube_.cubies_[RubikCube.FACE_R][5]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_R, 1, 1, cube_.cubies_[RubikCube.FACE_R][4]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R],  cube_.rots_[RubikCube.ROT_Y],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_R, 2, 1, cube_.cubies_[RubikCube.FACE_R][3]);
-//
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D], -cube_.rots_[RubikCube.ROT_B], RubikCube.FACE_R, 0, 2, cube_.cubies_[RubikCube.FACE_R][8]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_Z], RubikCube.FACE_R, 1, 2, cube_.cubies_[RubikCube.FACE_R][7]);
-//        drawCubieFace( cube_.rots_[RubikCube.ROT_R], -cube_.rots_[RubikCube.ROT_D],  cube_.rots_[RubikCube.ROT_F], RubikCube.FACE_R, 2, 2, cube_.cubies_[RubikCube.FACE_R][6]);
-//
-//        // Setup ortho for the UI
-//        GLES20.glViewport(0, 0, width_, height_);
-//        GLES20.glDisable(GLES20.GL_CULL_FACE);
-//        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-//
-//        float left = 0.0f;
-//        float right = width_;
-//        float bottom = height_;
-//        float top = 0.0f;
-//        float near = 0.0f;
-//        float far = 20.0f;
-//        Matrix.setIdentityM(projMatrix_, 0);
-//        Matrix.orthoM(projMatrix_, 0, left, right, bottom, top, near, far);
-//        Matrix.setLookAtM(viewMatrix_, 0,
-//                0, 0, 10,         // eye
-//                0f, 0f, 0f,       // center
-//                0f, 1.0f, 0.0f);  // up
-//
-//        buttonVerts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-//        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
-//        checkGlError("glVertexAttribPointer maPosition");
-//        buttonVerts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-//        GLES20.glEnableVertexAttribArray(posHandle_);
-//        checkGlError("glEnableVertexAttribArray posHandle");
-//        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, buttonVerts_);
-//        checkGlError("glVertexAttribPointer texHandle");
-//        GLES20.glEnableVertexAttribArray(texHandle_);
-//        checkGlError("glEnableVertexAttribArray texHandle");
-
-
-//            Matrix.setIdentityM(modelMatrix_, 0);
-//            Matrix.translateM(modelMatrix_, 0, b.x_, b.y_, 0);
-//            Matrix.scaleM(modelMatrix_, 0, b.width_, b.height_, 0);
-//            Matrix.multiplyMM(tempMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
-//            Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, tempMatrix_, 0);
-//            GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-//            GLES20.glUniform4f(vertColorHandle_, animVal, 1.0f, animVal, 1.0f);
-//            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, quadIndices_);
-//            checkGlError("glDrawElements");
-
-
+        render();
     }
 
     public int width()
@@ -415,4 +472,7 @@ public class Game implements GLSurfaceView.Renderer
         return height_;
     }
 
+    public void onTouch(int x, int y, boolean first)
+    {
+    }
 }

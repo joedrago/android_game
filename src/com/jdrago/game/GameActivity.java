@@ -18,4 +18,18 @@ public class GameActivity extends Activity
         view_ = new GameView(getApplication());
         setContentView(view_);
     }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+        view_.onPause();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        view_.onResume();
+    }
 }
