@@ -5,13 +5,17 @@ import android.os.Bundle;
 
 public class GameActivity extends Activity
 {
-    /**
-     * Called when the activity is first created.
-     */
+    private GameView view_;
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         //setContentView(R.layout.main);
+
+        getActionBar().hide();
+
+        view_ = new GameView(getApplication());
+        setContentView(view_);
     }
 }
