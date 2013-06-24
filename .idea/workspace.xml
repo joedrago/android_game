@@ -9,7 +9,7 @@
     </list>
     <ignored path="game.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372032373672" ignored="false" />
+    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372032409456" ignored="false" />
     <file path="/GameActivity.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372024493821" ignored="false" />
     <file path="/GameView.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372027294305" ignored="false" />
     <file path="/Game.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031125279" ignored="false" />
@@ -89,7 +89,7 @@
       <file leaf-file-name="TestGame.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="24" column="24" selection-start="493" selection-end="493" vertical-scroll-proportion="0.5714286">
+            <state line="31" column="5" selection-start="586" selection-end="586" vertical-scroll-proportion="0.7380952">
               <folding />
             </state>
           </provider>
@@ -447,7 +447,11 @@
       <created>1372031786363</created>
       <updated>1372031786363</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="assume 2d rendering">
+      <created>1372032389281</created>
+      <updated>1372032389281</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -620,7 +624,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="24" column="24" selection-start="493" selection-end="493" vertical-scroll-proportion="0.5714286">
+        <state line="31" column="5" selection-start="586" selection-end="586" vertical-scroll-proportion="0.7380952">
           <folding />
         </state>
       </provider>
