@@ -4,14 +4,12 @@
     <option name="TOOL_WINDOW_LOG_LEVEL" value="ERROR" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dd76f7b0-348f-491b-b808-ead8dc4f2073" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/jdrago/game/Game.java" afterPath="$PROJECT_DIR$/src/com/jdrago/game/Game.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" afterPath="$PROJECT_DIR$/src/com/jdrago/game/TestGame.java" />
+    <list default="true" id="dd76f7b0-348f-491b-b808-ead8dc4f2073" name="Default" comment="assume 2d rendering">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="game.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031702701" ignored="false" />
+    <file path="/Dummy.txt" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372032373672" ignored="false" />
     <file path="/GameActivity.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372024493821" ignored="false" />
     <file path="/GameView.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372027294305" ignored="false" />
     <file path="/Game.java" changelist="dd76f7b0-348f-491b-b808-ead8dc4f2073" time="1372031125279" ignored="false" />
@@ -91,7 +89,7 @@
       <file leaf-file-name="TestGame.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="0.64285713">
+            <state line="24" column="24" selection-start="493" selection-end="493" vertical-scroll-proportion="0.5714286">
               <folding />
             </state>
           </provider>
@@ -445,7 +443,11 @@
       <created>1372031703912</created>
       <updated>1372031703912</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="assume 2d rendering">
+      <created>1372031786363</created>
+      <updated>1372031786363</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -517,7 +519,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="bit of cleanup" />
+    <option name="LAST_COMMIT_MESSAGE" value="assume 2d rendering" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -536,6 +538,7 @@
     <MESSAGE value="functioning Sprites and clicking" />
     <MESSAGE value="fixes to sprite scale+rotate, added pngs" />
     <MESSAGE value="bit of cleanup" />
+    <MESSAGE value="assume 2d rendering" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -617,7 +620,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/jdrago/game/TestGame.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="0" selection-start="539" selection-end="539" vertical-scroll-proportion="0.64285713">
+        <state line="24" column="24" selection-start="493" selection-end="493" vertical-scroll-proportion="0.5714286">
           <folding />
         </state>
       </provider>
